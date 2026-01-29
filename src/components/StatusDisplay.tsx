@@ -18,12 +18,14 @@ export function StatusDisplay() {
     open: 'bg-success text-success-foreground',
     soon: 'bg-warning text-warning-foreground',
     closed: 'bg-closed text-closed-foreground',
+    maybe: 'bg-warning text-warning-foreground',
   };
 
   const statusText = {
     open: 'JA',
     soon: 'SNART',
     closed: 'NEJ',
+    maybe: 'KANSKE',
   };
 
   const formatTime = (num: number) => num.toString().padStart(2, '0');
@@ -37,7 +39,6 @@ export function StatusDisplay() {
           px-12 sm:px-16 py-6 sm:py-8 rounded-2xl
           shadow-2xl
           transition-all duration-500
-          ${status === 'open' ? 'animate-pulse-soft' : ''}
         `}
       >
         <p className="text-6xl sm:text-7xl md:text-8xl font-black tracking-tight">

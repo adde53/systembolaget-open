@@ -3,7 +3,7 @@ import { isSwedishHoliday } from '@/lib/swedishHolidays';
 
 export interface SystembolagetStatus {
   isOpen: boolean;
-  status: 'open' | 'closed' | 'soon';
+  status: 'open' | 'closed' | 'soon' | 'maybe';
   message: string;
   countdown: {
     hours: number;
@@ -25,6 +25,9 @@ const HOURS = {
   saturday: { open: 10, close: 15 },
   sunday: null,
 };
+
+// Extended hours for larger stores (some stores close at 20:00)
+const EXTENDED_CLOSE = 20;
 
 const DAY_NAMES = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag'];
 const SOON_THRESHOLD_MINUTES = 30;
@@ -56,6 +59,8 @@ export function useSystembolagetStatus(): SystembolagetStatus {
   });
 
   useEffect(() => {
+    let previousStatus: string | null = null;
+
     const updateStatus = () => {
       const now = getStockholmTime();
       const day = now.getDay();
@@ -94,38 +99,63 @@ export function useSystembolagetStatus(): SystembolagetStatus {
       // Holiday - closed all day
       if (holiday && holiday.closed) {
         const nextOpenDay = getNextOpenDay(now);
-        setStatus({
-          isOpen: false,
-          status: 'closed',
-          message: 'Nej, Systembolaget är stängt just nu.',
-          countdown: formatCountdown(nextOpenDay.seconds),
-          countdownLabel: nextOpenDay.label,
-          currentTime: timeString,
-          currentDate: dateString,
-          dayName,
-          todayHours: 'Stängt (helgdag)',
-          holiday: holiday.name,
-          isHoliday: true,
-        });
+        const currentStatus = 'closed-holiday';
+
+        if (previousStatus !== currentStatus) {
+          previousStatus = currentStatus;
+          setStatus({
+            isOpen: false,
+            status: 'closed',
+            message: 'Nej, Systembolaget är stängt just nu.',
+            countdown: formatCountdown(nextOpenDay.seconds),
+            countdownLabel: nextOpenDay.label,
+            currentTime: timeString,
+            currentDate: dateString,
+            dayName,
+            todayHours: 'Stängt (helgdag)',
+            holiday: holiday.name,
+            isHoliday: true,
+          });
+        } else {
+          // Only update countdown, time, and date
+          setStatus(prev => ({
+            ...prev,
+            countdown: formatCountdown(nextOpenDay.seconds),
+            currentTime: timeString,
+            currentDate: dateString,
+          }));
+        }
         return;
       }
 
       // Sunday - always closed
       if (day === 0) {
         const secondsUntilMonday = getSecondsUntil(10, 0, 1);
-        setStatus({
-          isOpen: false,
-          status: 'closed',
-          message: 'Nej, Systembolaget är stängt just nu.',
-          countdown: formatCountdown(secondsUntilMonday),
-          countdownLabel: 'Öppnar imorgon kl 10:00',
-          currentTime: timeString,
-          currentDate: dateString,
-          dayName,
-          todayHours: 'Stängt',
-          holiday: null,
-          isHoliday: false,
-        });
+        const currentStatus = 'closed-sunday';
+
+        if (previousStatus !== currentStatus) {
+          previousStatus = currentStatus;
+          setStatus({
+            isOpen: false,
+            status: 'closed',
+            message: 'Nej, Systembolaget är stängt just nu.',
+            countdown: formatCountdown(secondsUntilMonday),
+            countdownLabel: 'Öppnar imorgon kl 10:00',
+            currentTime: timeString,
+            currentDate: dateString,
+            dayName,
+            todayHours: 'Stängt',
+            holiday: null,
+            isHoliday: false,
+          });
+        } else {
+          setStatus(prev => ({
+            ...prev,
+            countdown: formatCountdown(secondsUntilMonday),
+            currentTime: timeString,
+            currentDate: dateString,
+          }));
+        }
         return;
       }
 
@@ -136,24 +166,68 @@ export function useSystembolagetStatus(): SystembolagetStatus {
 
       const openMinutes = todayHours.open * 60;
       const closeMinutes = todayHours.close * 60;
+      const extendedCloseMinutes = EXTENDED_CLOSE * 60;
       const todayHoursStr = `${todayHours.open}:00 – ${todayHours.close}:00`;
 
-      // Currently open
+      // Currently open (standard hours)
       if (currentMinutes >= openMinutes && currentMinutes < closeMinutes) {
         const secondsUntilClose = getSecondsUntil(todayHours.close, 0);
-        setStatus({
-          isOpen: true,
-          status: 'open',
-          message: 'Ja, Systembolaget är öppet just nu.',
-          countdown: formatCountdown(secondsUntilClose),
-          countdownLabel: `Stänger kl ${todayHours.close}:00`,
-          currentTime: timeString,
-          currentDate: dateString,
-          dayName,
-          todayHours: todayHoursStr,
-          holiday: null,
-          isHoliday: false,
-        });
+        const currentStatus = 'open';
+
+        if (previousStatus !== currentStatus) {
+          previousStatus = currentStatus;
+          setStatus({
+            isOpen: true,
+            status: 'open',
+            message: 'Ja, Systembolaget är öppet just nu.',
+            countdown: formatCountdown(secondsUntilClose),
+            countdownLabel: `Stänger kl ${todayHours.close}:00`,
+            currentTime: timeString,
+            currentDate: dateString,
+            dayName,
+            todayHours: todayHoursStr,
+            holiday: null,
+            isHoliday: false,
+          });
+        } else {
+          setStatus(prev => ({
+            ...prev,
+            countdown: formatCountdown(secondsUntilClose),
+            currentTime: timeString,
+            currentDate: dateString,
+          }));
+        }
+        return;
+      }
+
+      // Maybe open (19:00-20:00 on weekdays - some larger stores still open)
+      if (!isSaturday && currentMinutes >= closeMinutes && currentMinutes < extendedCloseMinutes) {
+        const secondsUntilExtendedClose = getSecondsUntil(EXTENDED_CLOSE, 0);
+        const currentStatus = 'maybe';
+
+        if (previousStatus !== currentStatus) {
+          previousStatus = currentStatus;
+          setStatus({
+            isOpen: false,
+            status: 'maybe',
+            message: 'Kanske. Vissa större butiker har öppet till 20:00.',
+            countdown: formatCountdown(secondsUntilExtendedClose),
+            countdownLabel: 'Större butiker kan ha öppet till 20:00',
+            currentTime: timeString,
+            currentDate: dateString,
+            dayName,
+            todayHours: `${todayHours.open}:00 – ${todayHours.close}:00 (större butiker till 20:00)`,
+            holiday: null,
+            isHoliday: false,
+          });
+        } else {
+          setStatus(prev => ({
+            ...prev,
+            countdown: formatCountdown(secondsUntilExtendedClose),
+            currentTime: timeString,
+            currentDate: dateString,
+          }));
+        }
         return;
       }
 
@@ -163,52 +237,88 @@ export function useSystembolagetStatus(): SystembolagetStatus {
         const secondsUntilOpen = getSecondsUntil(todayHours.open, 0);
         
         if (minutesUntilOpen <= SOON_THRESHOLD_MINUTES) {
-          setStatus({
-            isOpen: false,
-            status: 'soon',
-            message: 'Systembolaget öppnar snart.',
-            countdown: formatCountdown(secondsUntilOpen),
-            countdownLabel: `Öppnar kl ${todayHours.open}:00`,
-            currentTime: timeString,
-            currentDate: dateString,
-            dayName,
-            todayHours: todayHoursStr,
-            holiday: null,
-            isHoliday: false,
-          });
+          const currentStatus = 'soon';
+
+          if (previousStatus !== currentStatus) {
+            previousStatus = currentStatus;
+            setStatus({
+              isOpen: false,
+              status: 'soon',
+              message: 'Systembolaget öppnar snart.',
+              countdown: formatCountdown(secondsUntilOpen),
+              countdownLabel: `Öppnar kl ${todayHours.open}:00`,
+              currentTime: timeString,
+              currentDate: dateString,
+              dayName,
+              todayHours: todayHoursStr,
+              holiday: null,
+              isHoliday: false,
+            });
+          } else {
+            setStatus(prev => ({
+              ...prev,
+              countdown: formatCountdown(secondsUntilOpen),
+              currentTime: timeString,
+              currentDate: dateString,
+            }));
+          }
         } else {
-          setStatus({
-            isOpen: false,
-            status: 'closed',
-            message: 'Nej, Systembolaget är stängt just nu.',
-            countdown: formatCountdown(secondsUntilOpen),
-            countdownLabel: `Öppnar kl ${todayHours.open}:00`,
-            currentTime: timeString,
-            currentDate: dateString,
-            dayName,
-            todayHours: todayHoursStr,
-            holiday: null,
-            isHoliday: false,
-          });
+          const currentStatus = 'closed-before';
+
+          if (previousStatus !== currentStatus) {
+            previousStatus = currentStatus;
+            setStatus({
+              isOpen: false,
+              status: 'closed',
+              message: 'Nej, Systembolaget är stängt just nu.',
+              countdown: formatCountdown(secondsUntilOpen),
+              countdownLabel: `Öppnar kl ${todayHours.open}:00`,
+              currentTime: timeString,
+              currentDate: dateString,
+              dayName,
+              todayHours: todayHoursStr,
+              holiday: null,
+              isHoliday: false,
+            });
+          } else {
+            setStatus(prev => ({
+              ...prev,
+              countdown: formatCountdown(secondsUntilOpen),
+              currentTime: timeString,
+              currentDate: dateString,
+            }));
+          }
         }
         return;
       }
 
       // After closing
       const nextOpenDay = getNextOpenDay(now);
-      setStatus({
-        isOpen: false,
-        status: 'closed',
-        message: 'Nej, Systembolaget är stängt just nu.',
-        countdown: formatCountdown(nextOpenDay.seconds),
-        countdownLabel: nextOpenDay.label,
-        currentTime: timeString,
-        currentDate: dateString,
-        dayName,
-        todayHours: todayHoursStr,
-        holiday: null,
-        isHoliday: false,
-      });
+      const currentStatus = 'closed-after';
+
+      if (previousStatus !== currentStatus) {
+        previousStatus = currentStatus;
+        setStatus({
+          isOpen: false,
+          status: 'closed',
+          message: 'Nej, Systembolaget är stängt just nu.',
+          countdown: formatCountdown(nextOpenDay.seconds),
+          countdownLabel: nextOpenDay.label,
+          currentTime: timeString,
+          currentDate: dateString,
+          dayName,
+          todayHours: todayHoursStr,
+          holiday: null,
+          isHoliday: false,
+        });
+      } else {
+        setStatus(prev => ({
+          ...prev,
+          countdown: formatCountdown(nextOpenDay.seconds),
+          currentTime: timeString,
+          currentDate: dateString,
+        }));
+      }
     };
 
     updateStatus();
