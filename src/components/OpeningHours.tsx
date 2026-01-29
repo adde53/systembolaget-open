@@ -21,7 +21,7 @@ export function OpeningHours() {
       <div className="mt-4 pt-4 border-t border-border">
         <p className="text-xs text-muted-foreground leading-relaxed">
           Öppettider kan variera mellan butiker. Större butiker i städer har ofta 
-          öppet till 20:00 på vardagar och 17:00 på lördagar.
+          öppet till 20:00 på vardagar.
         </p>
       </div>
     </div>
