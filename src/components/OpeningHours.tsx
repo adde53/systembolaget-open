@@ -2,7 +2,7 @@ export function OpeningHours() {
   return (
     <section className="w-full max-w-2xl" aria-labelledby="opening-hours-heading">
       <h2 id="opening-hours-heading" className="text-2xl font-bold text-foreground mb-4">
-        Systembolagets öppettider idag
+        Vilka öppettider har Systembolaget idag?
       </h2>
       
       <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
