@@ -9,7 +9,7 @@
     <priority>1.0</priority>
   </url>
 
-  <!-- Example additional pages -->
+  <!-- About / Om oss -->
   <url>
     <loc>https://www.xn--rsystembolagetppet-ktb88a.se/om-oss</loc>
     <lastmod>2026-01-25</lastmod>
@@ -17,11 +17,36 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- Contact / Kontakt -->
   <url>
     <loc>https://www.xn--rsystembolagetppet-ktb88a.se/kontakt</loc>
     <lastmod>2026-01-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+  </url>
+
+  <!-- FAQ -->
+  <url>
+    <loc>https://www.xn--rsystembolagetppet-ktb88a.se/faq</loc>
+    <lastmod>2026-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Opening Hours Info -->
+  <url>
+    <loc>https://www.xn--rsystembolagetppet-ktb88a.se/oppenettider</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Holiday Info -->
+  <url>
+    <loc>https://www.xn--rsystembolagetppet-ktb88a.se/helgdagar</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
 
 </urlset>
