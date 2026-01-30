@@ -3,17 +3,17 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://www.timanstalld.se",
+  "homepage": "https://www.ärsystembolagetöppet.se",
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
