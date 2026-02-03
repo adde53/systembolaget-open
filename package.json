@@ -12,6 +12,7 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "serve": "node serve-dist.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },
