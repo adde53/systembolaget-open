@@ -10,8 +10,8 @@ interface StoreResult {
   placeId: string;
 }
 
-// NOTE: Replace with your Google Places API key (restrict it to your domain in Google Cloud Console)
-const GOOGLE_API_KEY = '';
+// NOTE: Restrict this key to your domain in Google Cloud Console
+const GOOGLE_API_KEY = 'AIzaSyBMLYgihTPP30-vY869AcFi8kfW4Ot-4CI';
 
 export function StoreSearch() {
   const [query, setQuery] = useState('');
