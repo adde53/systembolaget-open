@@ -34,8 +34,8 @@ const Index = () => {
           {/* Status display - Direct answer */}
           <StatusDisplay />
 
-          {/* Store search */}
-          <div className="mt-8 w-full max-w-md">
+          {/* Store search - Directly below status */}
+          <div className="mt-12 w-full max-w-md">
             <StoreSearch />
           </div>
 

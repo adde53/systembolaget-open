@@ -11,6 +11,40 @@ interface StoreResult {
   placeId: string;
 }
 
+// Helper function to determine if store is open based on current day/time
+const parseOpeningHours = (weekdayText: string[]): boolean | null => {
+  if (!weekdayText || weekdayText.length === 0) return null;
+
+  const now = new Date();
+  const days = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag'];
+  const currentDay = days[now.getDay()].toLowerCase();
+  const currentTime = now.getHours() * 60 + now.getMinutes(); // minutes since midnight
+
+  // Find today's hours
+  const todayHours = weekdayText.find(text =>
+    text.toLowerCase().includes(currentDay)
+  );
+
+  if (!todayHours) return null;
+
+  // Check if closed
+  if (todayHours.toLowerCase().includes('stängt')) return false;
+
+  // Parse time ranges (e.g., "10:00–20:00" or "10.00–20.00")
+  const timeMatch = todayHours.match(/(\d{1,2})[:.:](\d{2})[–-](\d{1,2})[:.:](\d{2})/);
+  if (!timeMatch) return null;
+
+  const openHour = parseInt(timeMatch[1]);
+  const openMin = parseInt(timeMatch[2]);
+  const closeHour = parseInt(timeMatch[3]);
+  const closeMin = parseInt(timeMatch[4]);
+
+  const openTime = openHour * 60 + openMin;
+  const closeTime = closeHour * 60 + closeMin;
+
+  return currentTime >= openTime && currentTime < closeTime;
+};
+
 export function StoreSearch() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<StoreResult[]>([]);
@@ -23,14 +57,23 @@ export function StoreSearch() {
   const mapDivRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let attempts = 0;
+    const maxAttempts = 50; // 5 seconds max wait
+
     const checkGoogleMaps = () => {
       if (window.google?.maps?.places) {
         setApiReady(true);
+        setError(null);
         if (mapDivRef.current && !placesServiceRef.current) {
           placesServiceRef.current = new window.google.maps.places.PlacesService(mapDivRef.current);
         }
       } else {
-        setTimeout(checkGoogleMaps, 100);
+        attempts++;
+        if (attempts < maxAttempts) {
+          setTimeout(checkGoogleMaps, 100);
+        } else {
+          setError('Google Maps kunde inte laddas. Kontrollera att API:et är aktiverat.');
+        }
       }
     };
     checkGoogleMaps();
@@ -53,40 +96,115 @@ export function StoreSearch() {
       language: 'sv',
     };
 
-    placesServiceRef.current.textSearch(request, (results, status) => {
-      setLoading(false);
-
+    placesServiceRef.current.textSearch(request, async (results, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-        const stores = results
-          .filter((place) => 
+        const filteredPlaces = results
+          .filter((place) =>
             place.name?.toLowerCase().includes('systembolaget')
           )
-          .slice(0, 5)
-          .map((place) => ({
-            name: place.name || 'Okänd butik',
-            address: place.formatted_address || '',
-            isOpen: place.opening_hours?.isOpen() ?? null,
-            openingHours: [],
-            placeId: place.place_id || '',
-          }));
+          .slice(0, 5);
 
-        setResults(stores);
-        
-        if (stores.length === 0) {
+        if (filteredPlaces.length === 0) {
+          setLoading(false);
           setError('Inga Systembolaget-butiker hittades. Prova ett annat sökord.');
+          return;
         }
+
+        // Fetch details for each place to get opening_hours
+        const storePromises = filteredPlaces.map((place) => {
+          return new Promise<StoreResult>((resolve) => {
+            if (!place.place_id || !placesServiceRef.current) {
+              resolve({
+                name: place.name || 'Okänd butik',
+                address: place.formatted_address || '',
+                isOpen: null,
+                openingHours: [],
+                placeId: place.place_id || '',
+              });
+              return;
+            }
+
+            const detailsRequest: google.maps.places.PlaceDetailsRequest = {
+              placeId: place.place_id,
+              fields: ['opening_hours', 'name', 'formatted_address'],
+              language: 'sv',
+            };
+
+            placesServiceRef.current.getDetails(detailsRequest, (details, detailStatus) => {
+              if (detailStatus === google.maps.places.PlacesServiceStatus.OK && details) {
+                const weekdayText = details.opening_hours?.weekday_text || [];
+                let isOpenNow: boolean | null = null;
+
+                // Try to get isOpen from API first
+                try {
+                  isOpenNow = details.opening_hours?.isOpen() ?? null;
+                } catch (e) {
+                  console.log('isOpen() not available, parsing manually');
+                }
+
+                // If still null, try to parse manually
+                if (isOpenNow === null && weekdayText.length > 0) {
+                  isOpenNow = parseOpeningHours(weekdayText);
+                }
+
+                resolve({
+                  name: details.name || place.name || 'Okänd butik',
+                  address: details.formatted_address || place.formatted_address || '',
+                  isOpen: isOpenNow,
+                  openingHours: weekdayText,
+                  placeId: place.place_id || '',
+                });
+              } else {
+                // Fallback to original place data
+                const weekdayText = place.opening_hours?.weekday_text || [];
+                let isOpenNow: boolean | null = null;
+
+                try {
+                  isOpenNow = place.opening_hours?.isOpen() ?? null;
+                } catch (e) {
+                  // Ignore
+                }
+
+                if (isOpenNow === null && weekdayText.length > 0) {
+                  isOpenNow = parseOpeningHours(weekdayText);
+                }
+
+                resolve({
+                  name: place.name || 'Okänd butik',
+                  address: place.formatted_address || '',
+                  isOpen: isOpenNow,
+                  openingHours: weekdayText,
+                  placeId: place.place_id || '',
+                });
+              }
+            });
+          });
+        });
+
+        const stores = await Promise.all(storePromises);
+        setResults(stores);
+        setLoading(false);
+
       } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
         setResults([]);
         setError('Inga butiker hittades.');
+        setLoading(false);
       } else {
         setResults([]);
         setError('Ett fel uppstod vid sökning. Försök igen.');
+        setLoading(false);
         console.error('Places search error:', status);
       }
     });
   };
 
   const getStoreDetails = (store: StoreResult) => {
+    // If we already have opening hours from the initial search, just show the store
+    if (store.openingHours.length > 0) {
+      setSelectedStore(store);
+      return;
+    }
+
     if (!placesServiceRef.current || !store.placeId) {
       setSelectedStore(store);
       return;
@@ -104,10 +222,23 @@ export function StoreSearch() {
       setLoading(false);
 
       if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+        const weekdayText = place.opening_hours?.weekday_text || [];
+        let isOpenNow: boolean | null = null;
+
+        try {
+          isOpenNow = place.opening_hours?.isOpen() ?? null;
+        } catch (e) {
+          console.log('isOpen() not available in details, parsing manually');
+        }
+
+        if (isOpenNow === null && weekdayText.length > 0) {
+          isOpenNow = parseOpeningHours(weekdayText);
+        }
+
         setSelectedStore({
           ...store,
-          openingHours: place.opening_hours?.weekday_text || [],
-          isOpen: place.opening_hours?.isOpen() ?? store.isOpen,
+          openingHours: weekdayText,
+          isOpen: isOpenNow ?? store.isOpen,
         });
       } else {
         setSelectedStore(store);
@@ -127,10 +258,15 @@ export function StoreSearch() {
       {/* Hidden div for PlacesService */}
       <div ref={mapDivRef} style={{ display: 'none' }} />
 
-      {/* Search description */}
-      <p className="text-sm text-muted-foreground text-center mb-3">
-        Vill du kolla öppettiderna för en specifik butik?
-      </p>
+      {/* Section heading */}
+      <div className="mb-4 text-center">
+        <h2 className="text-xl font-bold text-foreground mb-2">
+          Sök din butik
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Vill du kolla öppettiderna för en specifik butik?
+        </p>
+      </div>
 
       {/* Search input */}
       <div className="relative">
@@ -156,28 +292,54 @@ export function StoreSearch() {
 
       {/* Error message */}
       {error && (
-        <p className="text-sm text-destructive mt-3 text-center">{error}</p>
+        <div className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <p className="text-sm text-destructive font-medium">{error}</p>
+          {!apiReady && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Tips: Kontrollera att Places API är aktiverat i Google Cloud Console.
+            </p>
+          )}
+        </div>
       )}
 
       {/* Results list */}
       {results.length > 0 && !selectedStore && (
-        <div className="mt-4 space-y-2">
+        <div className="mt-4 space-y-3">
           {results.map((store) => (
             <button
               key={store.placeId}
               onClick={() => getStoreDetails(store)}
-              className="w-full text-left p-3 bg-card border border-border rounded-lg hover:bg-accent transition-colors"
+              className="w-full text-left p-4 bg-card border border-border rounded-lg hover:bg-accent transition-colors"
             >
-              <div className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+              <div className="flex items-start gap-3">
+                {/* JA/NEJ Status Box - Always show */}
+                <div className={`shrink-0 px-4 py-2 rounded-lg shadow-md ${
+                  store.isOpen === null
+                    ? 'bg-warning text-warning-foreground'
+                    : store.isOpen
+                    ? 'bg-success text-success-foreground'
+                    : 'bg-closed text-closed-foreground'
+                }`}>
+                  <p className="text-2xl font-black">
+                    {store.isOpen === null ? '?' : store.isOpen ? 'JA' : 'NEJ'}
+                  </p>
+                </div>
+
+                {/* Store Info */}
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground truncate">{store.name}</p>
-                  <p className="text-sm text-muted-foreground truncate">{store.address}</p>
-                  {store.isOpen !== null && (
-                    <span className={`text-xs font-medium ${store.isOpen ? 'text-success' : 'text-closed'}`}>
-                      {store.isOpen ? '● Öppet nu' : '● Stängt'}
-                    </span>
+                  <p className="font-semibold text-foreground text-lg mb-1">{store.name}</p>
+                  <div className="flex items-start gap-1 text-muted-foreground">
+                    <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+                    <p className="text-sm">{store.address}</p>
+                  </div>
+                  {store.isOpen === null && store.openingHours.length === 0 && (
+                    <p className="text-xs text-warning mt-1">
+                      Öppettider ej tillgängliga
+                    </p>
                   )}
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Klicka för mer info →
+                  </p>
                 </div>
               </div>
             </button>
@@ -187,47 +349,55 @@ export function StoreSearch() {
 
       {/* Selected store details */}
       {selectedStore && (
-        <div className="mt-4 p-4 bg-card border border-border rounded-lg">
-          <div className="flex items-start justify-between gap-2 mb-3">
-            <div>
-              <h3 className="font-semibold text-foreground">{selectedStore.name}</h3>
-              <p className="text-sm text-muted-foreground">{selectedStore.address}</p>
+        <div className="mt-4 p-5 bg-card border border-border rounded-lg">
+          {/* JA/NEJ Status - Prominent - Always show */}
+          <div className="flex justify-center mb-4">
+            <div className={`px-8 py-4 rounded-xl shadow-lg ${
+              selectedStore.isOpen === null
+                ? 'bg-warning text-warning-foreground'
+                : selectedStore.isOpen
+                ? 'bg-success text-success-foreground'
+                : 'bg-closed text-closed-foreground'
+            }`}>
+              <p className="text-4xl font-black">
+                {selectedStore.isOpen === null ? '?' : selectedStore.isOpen ? 'JA' : 'NEJ'}
+              </p>
             </div>
-            {selectedStore.isOpen !== null && (
-              <span className={`shrink-0 px-2 py-1 rounded text-xs font-bold ${
-                selectedStore.isOpen 
-                  ? 'bg-success text-success-foreground' 
-                  : 'bg-closed text-closed-foreground'
-              }`}>
-                {selectedStore.isOpen ? 'ÖPPET' : 'STÄNGT'}
-              </span>
-            )}
           </div>
 
+          {/* Store Name and Address */}
+          <div className="text-center mb-4">
+            <h3 className="text-xl font-bold text-foreground mb-1">{selectedStore.name}</h3>
+            <p className="text-sm text-muted-foreground">{selectedStore.address}</p>
+          </div>
+
+          {/* Opening Hours */}
           {selectedStore.openingHours.length > 0 && (
-            <div className="space-y-1">
-              <div className="flex items-center gap-1 text-sm font-medium text-foreground mb-2">
+            <div className="space-y-1 mb-4">
+              <div className="flex items-center justify-center gap-1 text-sm font-semibold text-foreground mb-3">
                 <Clock className="h-4 w-4" />
                 <span>Öppettider</span>
               </div>
               {selectedStore.openingHours.map((hours, index) => (
-                <p key={index} className="text-sm text-muted-foreground">
+                <p key={index} className="text-sm text-muted-foreground text-center">
                   {hours}
                 </p>
               ))}
             </div>
           )}
 
+          {/* Google Maps Link */}
           <a
             href={`https://www.google.com/maps/place/?q=place_id:${selectedStore.placeId}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 mt-3 text-sm text-primary hover:underline"
+            className="flex items-center justify-center gap-1 w-full py-2 px-4 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors"
           >
             Visa på Google Maps
-            <ExternalLink className="h-3 w-3" />
+            <ExternalLink className="h-4 w-4" />
           </a>
 
+          {/* Back Button */}
           <button
             onClick={() => {
               setSelectedStore(null);
