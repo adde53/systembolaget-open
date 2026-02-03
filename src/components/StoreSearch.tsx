@@ -199,13 +199,19 @@ export function StoreSearch() {
 
     const request: google.maps.places.PlaceDetailsRequest = {
       placeId: store.placeId,
-      fields: ['url', 'name'],
+      fields: ['url', 'name', 'website', 'place_id'],
       language: 'sv',
     };
 
     placesServiceRef.current.getDetails(request, (place, status) => {
       setLoading(false);
-      console.log('PlacesService getDetails response:', { status, hasUrl: !!place?.url, url: place?.url });
+      console.log('PlacesService getDetails response:', {
+        status,
+        hasUrl: !!place?.url,
+        url: place?.url,
+        place_id: place?.place_id,
+        name: place?.name
+      });
 
       if (status === google.maps.places.PlacesServiceStatus.OK && place) {
         if (place.url) {
@@ -367,11 +373,15 @@ export function StoreSearch() {
 
           {/* Google Maps Link - Uses native URL for mobile app support */}
           <a
-            href={selectedStore.url || `https://www.google.com/maps/place/?q=place_id:${selectedStore.placeId}`}
+            href={
+              selectedStore.url ||
+              `https://maps.google.com/maps?q=${encodeURIComponent(selectedStore.name + ', ' + selectedStore.address)}&ftid=${selectedStore.placeId}`
+            }
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => {
-              console.log('Opening Google Maps with URL:', selectedStore.url || `fallback: place_id:${selectedStore.placeId}`);
+              const url = selectedStore.url || `fallback with place_id: ${selectedStore.placeId}`;
+              console.log('Opening Google Maps with URL:', url);
             }}
             className="flex items-center justify-center gap-1 w-full py-2 px-4 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors"
           >
@@ -383,6 +393,11 @@ export function StoreSearch() {
           {selectedStore.url && (
             <p className="text-xs text-muted-foreground text-center mt-2">
               ✓ Native Maps URL loaded
+            </p>
+          )}
+          {!selectedStore.url && (
+            <p className="text-xs text-warning text-center mt-2">
+              Using fallback URL (may open in browser)
             </p>
           )}
 
