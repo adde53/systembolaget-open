@@ -1,4 +1,5 @@
 import { StatusDisplay } from '@/components/StatusDisplay';
+import { StoreSearch } from '@/components/StoreSearch';
 import { OpeningHours } from '@/components/OpeningHours';
 import { HolidayInfo } from '@/components/HolidayInfo';
 import { FAQ } from '@/components/FAQ';
@@ -32,6 +33,11 @@ const Index = () => {
 
           {/* Status display - Direct answer */}
           <StatusDisplay />
+
+          {/* Store search */}
+          <div className="mt-8 w-full max-w-md">
+            <StoreSearch />
+          </div>
 
           {/* Content sections */}
           <div className="mt-12 sm:mt-16 flex flex-col items-center gap-10 sm:gap-12 w-full px-4">
