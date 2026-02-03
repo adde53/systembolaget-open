@@ -203,6 +203,8 @@ export function StoreSearch() {
 
   return (
     <div className="w-full max-w-md mx-auto">
+      {/* Hidden div for PlacesService - needed for URL fetching */}
+      <div ref={mapDivRef} style={{ display: 'none' }} />
 
       {/* Section heading */}
       <div className="mb-4 text-center">
@@ -332,9 +334,9 @@ export function StoreSearch() {
             </div>
           )}
 
-          {/* Google Maps Link */}
+          {/* Google Maps Link - Uses native URL for mobile app support */}
           <a
-            href={`https://www.google.com/maps/place/?q=place_id:${selectedStore.placeId}`}
+            href={selectedStore.url || `https://www.google.com/maps/place/?q=place_id:${selectedStore.placeId}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-1 w-full py-2 px-4 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors"
