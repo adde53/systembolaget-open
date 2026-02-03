@@ -1,4 +1,5 @@
-import { useState } from 'react';
+/// <reference types="google.maps" />
+import { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search, MapPin, Clock, ExternalLink } from 'lucide-react';
 
@@ -10,21 +11,36 @@ interface StoreResult {
   placeId: string;
 }
 
-// NOTE: Restrict this key to your domain in Google Cloud Console
-const GOOGLE_API_KEY = 'AIzaSyBMLYgihTPP30-vY869AcFi8kfW4Ot-4CI';
-
 export function StoreSearch() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<StoreResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedStore, setSelectedStore] = useState<StoreResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [apiReady, setApiReady] = useState(false);
+  
+  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
+  const mapDivRef = useRef<HTMLDivElement>(null);
 
-  const searchStores = async () => {
+  useEffect(() => {
+    const checkGoogleMaps = () => {
+      if (window.google?.maps?.places) {
+        setApiReady(true);
+        if (mapDivRef.current && !placesServiceRef.current) {
+          placesServiceRef.current = new window.google.maps.places.PlacesService(mapDivRef.current);
+        }
+      } else {
+        setTimeout(checkGoogleMaps, 100);
+      }
+    };
+    checkGoogleMaps();
+  }, []);
+
+  const searchStores = () => {
     if (!query.trim()) return;
     
-    if (!GOOGLE_API_KEY) {
-      setError('Google API-nyckel saknas. Kontakta administratören.');
+    if (!apiReady || !placesServiceRef.current) {
+      setError('Google Maps laddas. Försök igen om en stund.');
       return;
     }
 
@@ -32,38 +48,26 @@ export function StoreSearch() {
     setError(null);
     setSelectedStore(null);
 
-    try {
-      // Search for Systembolaget stores using Google Places Text Search
-      const searchQuery = `Systembolaget ${query}`;
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${GOOGLE_API_KEY}&language=sv`
-      );
+    const request: google.maps.places.TextSearchRequest = {
+      query: `Systembolaget ${query}`,
+      language: 'sv',
+    };
 
-      if (!response.ok) {
-        throw new Error('Kunde inte söka efter butiker');
-      }
+    placesServiceRef.current.textSearch(request, (results, status) => {
+      setLoading(false);
 
-      const data = await response.json();
-
-      if (data.status === 'REQUEST_DENIED') {
-        setError('API-nyckeln är ogiltig eller saknar behörighet.');
-        setResults([]);
-        return;
-      }
-
-      if (data.results && data.results.length > 0) {
-        // Filter to only Systembolaget stores
-        const stores = data.results
-          .filter((place: any) => 
-            place.name.toLowerCase().includes('systembolaget')
+      if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+        const stores = results
+          .filter((place) => 
+            place.name?.toLowerCase().includes('systembolaget')
           )
           .slice(0, 5)
-          .map((place: any) => ({
-            name: place.name,
-            address: place.formatted_address,
-            isOpen: place.opening_hours?.open_now ?? null,
+          .map((place) => ({
+            name: place.name || 'Okänd butik',
+            address: place.formatted_address || '',
+            isOpen: place.opening_hours?.isOpen() ?? null,
             openingHours: [],
-            placeId: place.place_id,
+            placeId: place.place_id || '',
           }));
 
         setResults(stores);
@@ -71,44 +75,45 @@ export function StoreSearch() {
         if (stores.length === 0) {
           setError('Inga Systembolaget-butiker hittades. Prova ett annat sökord.');
         }
-      } else {
+      } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
         setResults([]);
         setError('Inga butiker hittades.');
+      } else {
+        setResults([]);
+        setError('Ett fel uppstod vid sökning. Försök igen.');
+        console.error('Places search error:', status);
       }
-    } catch (err) {
-      setError('Ett fel uppstod vid sökning. Försök igen.');
-      console.error('Search error:', err);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
-  const getStoreDetails = async (store: StoreResult) => {
-    if (!GOOGLE_API_KEY) return;
+  const getStoreDetails = (store: StoreResult) => {
+    if (!placesServiceRef.current || !store.placeId) {
+      setSelectedStore(store);
+      return;
+    }
 
     setLoading(true);
-    try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${store.placeId}&fields=opening_hours,formatted_phone_number&key=${GOOGLE_API_KEY}&language=sv`
-      );
 
-      const data = await response.json();
+    const request: google.maps.places.PlaceDetailsRequest = {
+      placeId: store.placeId,
+      fields: ['opening_hours', 'formatted_phone_number'],
+      language: 'sv',
+    };
 
-      if (data.result?.opening_hours?.weekday_text) {
+    placesServiceRef.current.getDetails(request, (place, status) => {
+      setLoading(false);
+
+      if (status === google.maps.places.PlacesServiceStatus.OK && place) {
         setSelectedStore({
           ...store,
-          openingHours: data.result.opening_hours.weekday_text,
-          isOpen: data.result.opening_hours.open_now ?? store.isOpen,
+          openingHours: place.opening_hours?.weekday_text || [],
+          isOpen: place.opening_hours?.isOpen() ?? store.isOpen,
         });
       } else {
         setSelectedStore(store);
+        console.error('Place details error:', status);
       }
-    } catch (err) {
-      setSelectedStore(store);
-      console.error('Details error:', err);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -119,6 +124,9 @@ export function StoreSearch() {
 
   return (
     <div className="w-full max-w-md mx-auto">
+      {/* Hidden div for PlacesService */}
+      <div ref={mapDivRef} style={{ display: 'none' }} />
+
       {/* Search description */}
       <p className="text-sm text-muted-foreground text-center mb-3">
         Vill du kolla öppettiderna för en specifik butik?
@@ -140,7 +148,7 @@ export function StoreSearch() {
       {/* Search button */}
       <button
         onClick={searchStores}
-        disabled={loading || !query.trim()}
+        disabled={loading || !query.trim() || !apiReady}
         className="w-full mt-2 bg-primary text-primary-foreground py-2 px-4 rounded-md font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? 'Söker...' : 'Sök butik'}
