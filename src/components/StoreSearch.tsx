@@ -1,5 +1,5 @@
 /// <reference types="google.maps" />
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search, MapPin, Clock, ExternalLink } from 'lucide-react';
 
@@ -52,9 +52,6 @@ export function StoreSearch() {
   const [selectedStore, setSelectedStore] = useState<StoreResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [apiReady, setApiReady] = useState(false);
-  
-  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
-  const mapDivRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Load Google Maps script dynamically with API key from environment
@@ -62,9 +59,6 @@ export function StoreSearch() {
       // Check if script is already loaded
       if (window.google?.maps?.places) {
         setApiReady(true);
-        if (mapDivRef.current && !placesServiceRef.current) {
-          placesServiceRef.current = new window.google.maps.places.PlacesService(mapDivRef.current);
-        }
         return;
       }
 
@@ -77,9 +71,6 @@ export function StoreSearch() {
           if (window.google?.maps?.places) {
             setApiReady(true);
             setError(null);
-            if (mapDivRef.current && !placesServiceRef.current) {
-              placesServiceRef.current = new window.google.maps.places.PlacesService(mapDivRef.current);
-            }
           } else {
             attempts++;
             if (attempts < maxAttempts) {
@@ -101,16 +92,13 @@ export function StoreSearch() {
       }
 
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
       script.async = true;
       script.defer = true;
       script.onload = () => {
         if (window.google?.maps?.places) {
           setApiReady(true);
           setError(null);
-          if (mapDivRef.current && !placesServiceRef.current) {
-            placesServiceRef.current = new window.google.maps.places.PlacesService(mapDivRef.current);
-          }
         }
       };
       script.onerror = () => {
@@ -122,10 +110,10 @@ export function StoreSearch() {
     loadGoogleMapsScript();
   }, []);
 
-  const searchStores = () => {
+  const searchStores = async () => {
     if (!query.trim()) return;
     
-    if (!apiReady || !placesServiceRef.current) {
+    if (!apiReady) {
       setError('Google Maps laddas. Försök igen om en stund.');
       return;
     }
@@ -134,160 +122,77 @@ export function StoreSearch() {
     setError(null);
     setSelectedStore(null);
 
-    const request: google.maps.places.TextSearchRequest = {
-      query: `Systembolaget ${query}`,
-      language: 'sv',
-    };
+    try {
+      // Use the new Place API searchByText
+      const { Place } = await google.maps.importLibrary("places") as google.maps.PlacesLibrary;
 
-    placesServiceRef.current.textSearch(request, async (results, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-        const filteredPlaces = results
-          .filter((place) =>
-            place.name?.toLowerCase().includes('systembolaget')
-          )
-          .slice(0, 5);
+      const request = {
+        textQuery: `Systembolaget ${query}`,
+        fields: ['displayName', 'formattedAddress', 'id', 'currentOpeningHours'],
+        language: 'sv',
+        maxResultCount: 5,
+      };
 
-        if (filteredPlaces.length === 0) {
-          setLoading(false);
-          setError('Inga Systembolaget-butiker hittades. Prova ett annat sökord.');
-          return;
-        }
+      // @ts-ignore - searchByText is part of the new API
+      const { places } = await Place.searchByText(request);
 
-        // Fetch details for each place to get opening_hours
-        const storePromises = filteredPlaces.map((place) => {
-          return new Promise<StoreResult>((resolve) => {
-            if (!place.place_id || !placesServiceRef.current) {
-              resolve({
-                name: place.name || 'Okänd butik',
-                address: place.formatted_address || '',
-                isOpen: null,
-                openingHours: [],
-                placeId: place.place_id || '',
-              });
-              return;
-            }
-
-            const detailsRequest: google.maps.places.PlaceDetailsRequest = {
-              placeId: place.place_id,
-              fields: ['opening_hours', 'name', 'formatted_address'],
-              language: 'sv',
-            };
-
-            placesServiceRef.current.getDetails(detailsRequest, (details, detailStatus) => {
-              if (detailStatus === google.maps.places.PlacesServiceStatus.OK && details) {
-                const weekdayText = details.opening_hours?.weekday_text || [];
-                let isOpenNow: boolean | null = null;
-
-                // Try to get isOpen from API first
-                try {
-                  isOpenNow = details.opening_hours?.isOpen() ?? null;
-                } catch (e) {
-                  console.log('isOpen() not available, parsing manually');
-                }
-
-                // If still null, try to parse manually
-                if (isOpenNow === null && weekdayText.length > 0) {
-                  isOpenNow = parseOpeningHours(weekdayText);
-                }
-
-                resolve({
-                  name: details.name || place.name || 'Okänd butik',
-                  address: details.formatted_address || place.formatted_address || '',
-                  isOpen: isOpenNow,
-                  openingHours: weekdayText,
-                  placeId: place.place_id || '',
-                });
-              } else {
-                // Fallback to original place data
-                const weekdayText = place.opening_hours?.weekday_text || [];
-                let isOpenNow: boolean | null = null;
-
-                try {
-                  isOpenNow = place.opening_hours?.isOpen() ?? null;
-                } catch (e) {
-                  // Ignore
-                }
-
-                if (isOpenNow === null && weekdayText.length > 0) {
-                  isOpenNow = parseOpeningHours(weekdayText);
-                }
-
-                resolve({
-                  name: place.name || 'Okänd butik',
-                  address: place.formatted_address || '',
-                  isOpen: isOpenNow,
-                  openingHours: weekdayText,
-                  placeId: place.place_id || '',
-                });
-              }
-            });
-          });
-        });
-
-        const stores = await Promise.all(storePromises);
-        setResults(stores);
+      if (!places || places.length === 0) {
         setLoading(false);
-
-      } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-        setResults([]);
-        setError('Inga butiker hittades.');
-        setLoading(false);
-      } else {
-        setResults([]);
-        setError('Ett fel uppstod vid sökning. Försök igen.');
-        setLoading(false);
-        console.error('Places search error:', status);
+        setError('Inga Systembolaget-butiker hittades. Prova ett annat sökord.');
+        return;
       }
-    });
-  };
 
-  const getStoreDetails = (store: StoreResult) => {
-    // If we already have opening hours from the initial search, just show the store
-    if (store.openingHours.length > 0) {
-      setSelectedStore(store);
-      return;
-    }
+      // Filter for Systembolaget stores
+      const filteredPlaces = places.filter((place: any) =>
+        place.displayName?.toLowerCase().includes('systembolaget')
+      );
 
-    if (!placesServiceRef.current || !store.placeId) {
-      setSelectedStore(store);
-      return;
-    }
+      if (filteredPlaces.length === 0) {
+        setLoading(false);
+        setError('Inga Systembolaget-butiker hittades. Prova ett annat sökord.');
+        return;
+      }
 
-    setLoading(true);
-
-    const request: google.maps.places.PlaceDetailsRequest = {
-      placeId: store.placeId,
-      fields: ['opening_hours', 'formatted_phone_number'],
-      language: 'sv',
-    };
-
-    placesServiceRef.current.getDetails(request, (place, status) => {
-      setLoading(false);
-
-      if (status === google.maps.places.PlacesServiceStatus.OK && place) {
-        const weekdayText = place.opening_hours?.weekday_text || [];
+      // Map to our store format
+      const stores: StoreResult[] = filteredPlaces.map((place: any) => {
+        const weekdayText = place.currentOpeningHours?.weekdayDescriptions || [];
         let isOpenNow: boolean | null = null;
 
+        // Try to get isOpen status
         try {
-          isOpenNow = place.opening_hours?.isOpen() ?? null;
+          isOpenNow = place.currentOpeningHours?.isOpen() ?? null;
         } catch (e) {
-          console.log('isOpen() not available in details, parsing manually');
+          console.log('isOpen() not available, parsing manually');
         }
 
+        // Fallback to manual parsing
         if (isOpenNow === null && weekdayText.length > 0) {
           isOpenNow = parseOpeningHours(weekdayText);
         }
 
-        setSelectedStore({
-          ...store,
+        return {
+          name: place.displayName || 'Okänd butik',
+          address: place.formattedAddress || '',
+          isOpen: isOpenNow,
           openingHours: weekdayText,
-          isOpen: isOpenNow ?? store.isOpen,
-        });
-      } else {
-        setSelectedStore(store);
-        console.error('Place details error:', status);
-      }
-    });
+          placeId: place.id || '',
+        };
+      });
+
+      setResults(stores);
+      setLoading(false);
+
+    } catch (error) {
+      console.error('Search error:', error);
+      setError('Ett fel uppstod vid sökning. Försök igen.');
+      setLoading(false);
+    }
+  };
+
+  const getStoreDetails = (store: StoreResult) => {
+    // With the new Place API, we already have all data from the search
+    // No need to fetch details separately
+    setSelectedStore(store);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -298,8 +203,6 @@ export function StoreSearch() {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      {/* Hidden div for PlacesService */}
-      <div ref={mapDivRef} style={{ display: 'none' }} />
 
       {/* Section heading */}
       <div className="mb-4 text-center">
