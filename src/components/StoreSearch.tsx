@@ -57,26 +57,69 @@ export function StoreSearch() {
   const mapDivRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let attempts = 0;
-    const maxAttempts = 50; // 5 seconds max wait
-
-    const checkGoogleMaps = () => {
+    // Load Google Maps script dynamically with API key from environment
+    const loadGoogleMapsScript = () => {
+      // Check if script is already loaded
       if (window.google?.maps?.places) {
         setApiReady(true);
-        setError(null);
         if (mapDivRef.current && !placesServiceRef.current) {
           placesServiceRef.current = new window.google.maps.places.PlacesService(mapDivRef.current);
         }
-      } else {
-        attempts++;
-        if (attempts < maxAttempts) {
-          setTimeout(checkGoogleMaps, 100);
-        } else {
-          setError('Google Maps kunde inte laddas. Kontrollera att API:et är aktiverat.');
-        }
+        return;
       }
+
+      // Check if script tag already exists
+      if (document.querySelector('script[src*="maps.googleapis.com"]')) {
+        // Script is loading, wait for it
+        let attempts = 0;
+        const maxAttempts = 50;
+        const checkLoaded = () => {
+          if (window.google?.maps?.places) {
+            setApiReady(true);
+            setError(null);
+            if (mapDivRef.current && !placesServiceRef.current) {
+              placesServiceRef.current = new window.google.maps.places.PlacesService(mapDivRef.current);
+            }
+          } else {
+            attempts++;
+            if (attempts < maxAttempts) {
+              setTimeout(checkLoaded, 100);
+            } else {
+              setError('Google Maps kunde inte laddas. Kontrollera att API:et är aktiverat.');
+            }
+          }
+        };
+        checkLoaded();
+        return;
+      }
+
+      // Create and load the script
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      if (!apiKey) {
+        setError('Google Maps API-nyckel saknas. Kontakta administratören.');
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        if (window.google?.maps?.places) {
+          setApiReady(true);
+          setError(null);
+          if (mapDivRef.current && !placesServiceRef.current) {
+            placesServiceRef.current = new window.google.maps.places.PlacesService(mapDivRef.current);
+          }
+        }
+      };
+      script.onerror = () => {
+        setError('Google Maps kunde inte laddas. Kontrollera att API:et är aktiverat.');
+      };
+      document.head.appendChild(script);
     };
-    checkGoogleMaps();
+
+    loadGoogleMapsScript();
   }, []);
 
   const searchStores = () => {
