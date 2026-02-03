@@ -1,5 +1,5 @@
 /// <reference types="google.maps" />
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search, MapPin, Clock, ExternalLink } from 'lucide-react';
 
@@ -9,6 +9,7 @@ interface StoreResult {
   isOpen: boolean | null;
   openingHours: string[];
   placeId: string;
+  url?: string;
 }
 
 // Helper function to determine if store is open based on current day/time
@@ -53,12 +54,19 @@ export function StoreSearch() {
   const [error, setError] = useState<string | null>(null);
   const [apiReady, setApiReady] = useState(false);
 
+  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
+  const mapDivRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     // Load Google Maps script dynamically with API key from environment
     const loadGoogleMapsScript = () => {
       // Check if script is already loaded
       if (window.google?.maps?.places) {
         setApiReady(true);
+        // Initialize PlacesService
+        if (mapDivRef.current && !placesServiceRef.current) {
+          placesServiceRef.current = new window.google.maps.places.PlacesService(mapDivRef.current);
+        }
         return;
       }
 
@@ -71,6 +79,10 @@ export function StoreSearch() {
           if (window.google?.maps?.places) {
             setApiReady(true);
             setError(null);
+            // Initialize PlacesService
+            if (mapDivRef.current && !placesServiceRef.current) {
+              placesServiceRef.current = new window.google.maps.places.PlacesService(mapDivRef.current);
+            }
           } else {
             attempts++;
             if (attempts < maxAttempts) {
@@ -99,6 +111,10 @@ export function StoreSearch() {
         if (window.google?.maps?.places) {
           setApiReady(true);
           setError(null);
+          // Initialize PlacesService
+          if (mapDivRef.current && !placesServiceRef.current) {
+            placesServiceRef.current = new window.google.maps.places.PlacesService(mapDivRef.current);
+          }
         }
       };
       script.onerror = () => {
@@ -371,17 +387,13 @@ export function StoreSearch() {
             </div>
           )}
 
-          {/* Google Maps Link - Uses native URL for mobile app support */}
+          {/* Google Maps Link - Using geo: URI for guaranteed mobile compatibility */}
           <a
-            href={
-              selectedStore.url ||
-              `https://maps.google.com/maps?q=${encodeURIComponent(selectedStore.name + ', ' + selectedStore.address)}&ftid=${selectedStore.placeId}`
-            }
+            href={`geo:0,0?q=${encodeURIComponent(selectedStore.address)}`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => {
-              const url = selectedStore.url || `fallback with place_id: ${selectedStore.placeId}`;
-              console.log('Opening Google Maps with URL:', url);
+              console.log('Opening with geo: URI for address:', selectedStore.address);
             }}
             className="flex items-center justify-center gap-1 w-full py-2 px-4 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors"
           >
@@ -389,17 +401,10 @@ export function StoreSearch() {
             <ExternalLink className="h-4 w-4" />
           </a>
 
-          {/* Debug info - remove in production */}
-          {selectedStore.url && (
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              ✓ Native Maps URL loaded
-            </p>
-          )}
-          {!selectedStore.url && (
-            <p className="text-xs text-warning text-center mt-2">
-              Using fallback URL (may open in browser)
-            </p>
-          )}
+          {/* Info message */}
+          <p className="text-xs text-muted-foreground text-center mt-2">
+            Öppnar i din karta-app
+          </p>
 
           {/* Back Button */}
           <button
