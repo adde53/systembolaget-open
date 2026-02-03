@@ -110,10 +110,10 @@ export function StoreSearch() {
     loadGoogleMapsScript();
   }, []);
 
-  const searchStores = async () => {
+  const searchStores = () => {
     if (!query.trim()) return;
     
-    if (!apiReady) {
+    if (!apiReady || !placesServiceRef.current) {
       setError('Google Maps laddas. Försök igen om en stund.');
       return;
     }
@@ -122,77 +122,108 @@ export function StoreSearch() {
     setError(null);
     setSelectedStore(null);
 
-    try {
-      // Use the new Place API searchByText
-      const { Place } = await google.maps.importLibrary("places") as google.maps.PlacesLibrary;
+    const request: google.maps.places.TextSearchRequest = {
+      query: `Systembolaget ${query}`,
+      language: 'sv',
+    };
 
-      const request = {
-        textQuery: `Systembolaget ${query}`,
-        fields: ['displayName', 'formattedAddress', 'id', 'currentOpeningHours'],
-        language: 'sv',
-        maxResultCount: 5,
-      };
-
-      // @ts-ignore - searchByText is part of the new API
-      const { places } = await Place.searchByText(request);
-
-      if (!places || places.length === 0) {
-        setLoading(false);
-        setError('Inga Systembolaget-butiker hittades. Prova ett annat sökord.');
-        return;
-      }
-
-      // Filter for Systembolaget stores
-      const filteredPlaces = places.filter((place: any) =>
-        place.displayName?.toLowerCase().includes('systembolaget')
-      );
-
-      if (filteredPlaces.length === 0) {
-        setLoading(false);
-        setError('Inga Systembolaget-butiker hittades. Prova ett annat sökord.');
-        return;
-      }
-
-      // Map to our store format
-      const stores: StoreResult[] = filteredPlaces.map((place: any) => {
-        const weekdayText = place.currentOpeningHours?.weekdayDescriptions || [];
-        let isOpenNow: boolean | null = null;
-
-        // Try to get isOpen status
-        try {
-          isOpenNow = place.currentOpeningHours?.isOpen() ?? null;
-        } catch (e) {
-          console.log('isOpen() not available, parsing manually');
-        }
-
-        // Fallback to manual parsing
-        if (isOpenNow === null && weekdayText.length > 0) {
-          isOpenNow = parseOpeningHours(weekdayText);
-        }
-
-        return {
-          name: place.displayName || 'Okänd butik',
-          address: place.formattedAddress || '',
-          isOpen: isOpenNow,
-          openingHours: weekdayText,
-          placeId: place.id || '',
-        };
-      });
-
-      setResults(stores);
+    placesServiceRef.current.textSearch(request, (results, status) => {
       setLoading(false);
 
-    } catch (error) {
-      console.error('Search error:', error);
-      setError('Ett fel uppstod vid sökning. Försök igen.');
-      setLoading(false);
-    }
+      if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+        const stores = results
+          .filter((place) =>
+            place.name?.toLowerCase().includes('systembolaget')
+          )
+          .slice(0, 5)
+          .map((place) => {
+            const weekdayText = place.opening_hours?.weekday_text || [];
+            let isOpenNow: boolean | null = null;
+
+            // Try to get isOpen status
+            try {
+              isOpenNow = place.opening_hours?.isOpen() ?? null;
+            } catch (e) {
+              console.log('isOpen() not available, parsing manually');
+            }
+
+            // Fallback to manual parsing
+            if (isOpenNow === null && weekdayText.length > 0) {
+              isOpenNow = parseOpeningHours(weekdayText);
+            }
+
+            return {
+              name: place.name || 'Okänd butik',
+              address: place.formatted_address || '',
+              isOpen: isOpenNow,
+              openingHours: weekdayText,
+              placeId: place.place_id || '',
+            };
+          });
+
+        setResults(stores);
+
+        if (stores.length === 0) {
+          setError('Inga Systembolaget-butiker hittades. Prova ett annat sökord.');
+        }
+      } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+        setResults([]);
+        setError('Inga butiker hittades.');
+      } else {
+        setResults([]);
+        setError('Ett fel uppstod vid sökning. Försök igen.');
+        console.error('Places search error:', status);
+      }
+    });
   };
 
   const getStoreDetails = (store: StoreResult) => {
-    // With the new Place API, we already have all data from the search
-    // No need to fetch details separately
-    setSelectedStore(store);
+    console.log('getStoreDetails called for:', store.name, 'placeId:', store.placeId);
+
+    // Fetch the Google Maps URL for mobile app support
+    if (!placesServiceRef.current || !store.placeId) {
+      console.log('PlacesService not ready or no placeId, showing store without URL');
+      setSelectedStore(store);
+      return;
+    }
+
+    // If we already have the URL, just show the store
+    if (store.url) {
+      console.log('Already have URL:', store.url);
+      setSelectedStore(store);
+      return;
+    }
+
+    console.log('Fetching URL from PlacesService...');
+    setLoading(true);
+
+    const request: google.maps.places.PlaceDetailsRequest = {
+      placeId: store.placeId,
+      fields: ['url', 'name'],
+      language: 'sv',
+    };
+
+    placesServiceRef.current.getDetails(request, (place, status) => {
+      setLoading(false);
+      console.log('PlacesService getDetails response:', { status, hasUrl: !!place?.url, url: place?.url });
+
+      if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+        if (place.url) {
+          console.log('✅ Got native Google Maps URL:', place.url);
+        } else {
+          console.log('⚠️ No URL in response, will use fallback');
+        }
+
+        setSelectedStore({
+          ...store,
+          url: place.url || undefined,
+        });
+      } else {
+        // Fallback to showing store without URL
+        console.error('❌ Failed to fetch place URL. Status:', status);
+        setSelectedStore(store);
+      }
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -339,11 +370,21 @@ export function StoreSearch() {
             href={selectedStore.url || `https://www.google.com/maps/place/?q=place_id:${selectedStore.placeId}`}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => {
+              console.log('Opening Google Maps with URL:', selectedStore.url || `fallback: place_id:${selectedStore.placeId}`);
+            }}
             className="flex items-center justify-center gap-1 w-full py-2 px-4 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors"
           >
             Visa på Google Maps
             <ExternalLink className="h-4 w-4" />
           </a>
+
+          {/* Debug info - remove in production */}
+          {selectedStore.url && (
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              ✓ Native Maps URL loaded
+            </p>
+          )}
 
           {/* Back Button */}
           <button
