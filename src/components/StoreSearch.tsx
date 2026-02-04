@@ -1,7 +1,7 @@
 /// <reference types="google.maps" />
 import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import { Search, MapPin, Clock, ExternalLink } from 'lucide-react';
+import { Search, MapPin, Clock, ExternalLink, Copy, Check } from 'lucide-react';
 
 interface StoreResult {
   name: string;
@@ -10,7 +10,117 @@ interface StoreResult {
   openingHours: string[];
   placeId: string;
   url?: string;
+  lat?: number;
+  lng?: number;
 }
+
+// Helper: detect iOS
+const isIOS = (): boolean => {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+};
+
+// Helper: build Google Maps web URL (coordinate-first strategy)
+const buildGoogleMapsWebUrl = (store: StoreResult): string => {
+  if (store.lat !== undefined && store.lng !== undefined) {
+    return `https://www.google.com/maps/search/?api=1&query=${store.lat},${store.lng}`;
+  }
+  if (store.placeId) {
+    return `https://www.google.com/maps/place/?q=place_id:${store.placeId}`;
+  }
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.name + ' ' + store.address)}`;
+};
+
+// Helper: open Google Maps with iOS deep link support
+const openGoogleMaps = (store: StoreResult): void => {
+  const webUrl = buildGoogleMapsWebUrl(store);
+  
+  if (isIOS()) {
+    // Build iOS deep link
+    let appUrl: string;
+    if (store.lat !== undefined && store.lng !== undefined) {
+      appUrl = `comgooglemaps://?q=${store.lat},${store.lng}(${encodeURIComponent(store.name)})&center=${store.lat},${store.lng}&zoom=16`;
+    } else if (store.placeId) {
+      appUrl = `comgooglemaps://?q=place_id:${store.placeId}`;
+    } else {
+      appUrl = `comgooglemaps://?q=${encodeURIComponent(store.name + ' ' + store.address)}`;
+    }
+    
+    console.log('iOS detected, trying deep link:', appUrl);
+    
+    // Try deep link first, fallback to web after 800ms
+    const fallbackTimeout = setTimeout(() => {
+      console.log('Deep link timeout, falling back to web URL:', webUrl);
+      window.location.href = webUrl;
+    }, 800);
+    
+    // Attempt to open the app
+    window.location.href = appUrl;
+    
+    // If page becomes hidden (app opened), clear the fallback
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        clearTimeout(fallbackTimeout);
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Also clear after a longer timeout to clean up
+    setTimeout(() => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, 2000);
+  } else {
+    // Non-iOS: just open web URL
+    console.log('Opening Google Maps web URL:', webUrl);
+    window.open(webUrl, '_blank', 'noopener,noreferrer');
+  }
+};
+
+// Helper: copy link to clipboard
+const copyMapsLink = async (store: StoreResult): Promise<boolean> => {
+  const webUrl = buildGoogleMapsWebUrl(store);
+  try {
+    await navigator.clipboard.writeText(webUrl);
+    return true;
+  } catch {
+    // Fallback for older browsers
+    const result = window.prompt('Kopiera denna länk:', webUrl);
+    return result !== null;
+  }
+};
+
+// Copy link button component with feedback
+const CopyLinkButton = ({ store }: { store: StoreResult }) => {
+  const [copied, setCopied] = useState(false);
+  
+  const handleCopy = async () => {
+    const success = await copyMapsLink(store);
+    if (success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+  
+  return (
+    <button
+      onClick={handleCopy}
+      className="w-full flex items-center justify-center gap-2 bg-secondary text-secondary-foreground py-2 px-4 rounded-lg font-medium hover:bg-secondary/80 transition-colors"
+    >
+      {copied ? (
+        <>
+          <Check className="h-4 w-4" />
+          Länk kopierad!
+        </>
+      ) : (
+        <>
+          <Copy className="h-4 w-4" />
+          Kopiera kartlänk
+        </>
+      )}
+    </button>
+  );
+};
 
 // Helper function to determine if store is open based on current day/time
 const parseOpeningHours = (weekdayText: string[]): boolean | null => {
@@ -176,6 +286,8 @@ export function StoreSearch() {
               isOpen: isOpenNow,
               openingHours: weekdayText,
               placeId: place.place_id || '',
+              lat: place.geometry?.location?.lat?.(),
+              lng: place.geometry?.location?.lng?.(),
             };
           });
 
@@ -217,7 +329,7 @@ export function StoreSearch() {
 
     const request: google.maps.places.PlaceDetailsRequest = {
       placeId: store.placeId,
-      fields: ['url', 'name', 'website', 'place_id'],
+      fields: ['url', 'name', 'website', 'place_id', 'geometry', 'formatted_address'],
       language: 'sv',
     };
 
@@ -241,6 +353,8 @@ export function StoreSearch() {
         setSelectedStore({
           ...store,
           url: place.url || undefined,
+          lat: place.geometry?.location?.lat?.() ?? store.lat,
+          lng: place.geometry?.location?.lng?.() ?? store.lng,
         });
       } else {
         // Fallback to showing store without URL
@@ -389,6 +503,17 @@ export function StoreSearch() {
             </div>
           )}
 
+          {/* Google Maps Buttons */}
+          <div className="space-y-2 mb-4">
+            <button
+              onClick={() => openGoogleMaps(selectedStore)}
+              className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 px-4 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Öppna i Google Maps
+            </button>
+            <CopyLinkButton store={selectedStore} />
+          </div>
 
           {/* Back Button */}
           <button
@@ -397,7 +522,7 @@ export function StoreSearch() {
               setResults([]);
               setQuery('');
             }}
-            className="block w-full mt-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="block w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             ← Sök igen
           </button>
