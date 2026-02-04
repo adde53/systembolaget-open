@@ -389,15 +389,11 @@ export function StoreSearch() {
             </div>
           )}
 
-          {/* Google Maps Link - Using geo: URI for guaranteed mobile compatibility - BUILD_MARKER_XYZ123 */}
+          {/* Google Maps Link - Universal URL that works on all devices */}
           <a
-            href={`geo:0,0?q=${encodeURIComponent(selectedStore.address)}`}
+            href={selectedStore.url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedStore.name + ' ' + selectedStore.address)}`}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => {
-              console.log('Opening with geo: URI for address:', selectedStore.address);
-              console.log('BUILD_MARKER_XYZ123 - geo URI is active');
-            }}
             className="flex items-center justify-center gap-1 w-full py-2 px-4 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors"
           >
             Visa på Google Maps
@@ -406,7 +402,7 @@ export function StoreSearch() {
 
           {/* Info message */}
           <p className="text-xs text-muted-foreground text-center mt-2">
-            Öppnar i din karta-app
+            Öppnar Google Maps
           </p>
 
           {/* Back Button */}
