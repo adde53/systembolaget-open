@@ -389,23 +389,6 @@ export function StoreSearch() {
             </div>
           )}
 
-          {/* Google Maps Link - Universal URL that works on all devices */}
-          <button
-            onClick={() => {
-              // Always use search URL format - it's more reliable on mobile than place_id URLs
-              const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedStore.name + ' ' + selectedStore.address)}`;
-              window.open(mapsUrl, '_blank', 'noopener,noreferrer');
-            }}
-            className="flex items-center justify-center gap-1 w-full py-2 px-4 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors"
-          >
-            Visa på Google Maps
-            <ExternalLink className="h-4 w-4" />
-          </button>
-
-          {/* Info message */}
-          <p className="text-xs text-muted-foreground text-center mt-2">
-            Öppnar Google Maps i nytt fönster
-          </p>
 
           {/* Back Button */}
           <button
