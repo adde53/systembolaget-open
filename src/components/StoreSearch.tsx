@@ -392,8 +392,8 @@ export function StoreSearch() {
           {/* Google Maps Link - Universal URL that works on all devices */}
           <button
             onClick={() => {
-              const mapsUrl = selectedStore.url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedStore.name + ' ' + selectedStore.address)}`;
-              // Use window.open with specific parameters to bypass iframe restrictions
+              // Always use search URL format - it's more reliable on mobile than place_id URLs
+              const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedStore.name + ' ' + selectedStore.address)}`;
               window.open(mapsUrl, '_blank', 'noopener,noreferrer');
             }}
             className="flex items-center justify-center gap-1 w-full py-2 px-4 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors"
