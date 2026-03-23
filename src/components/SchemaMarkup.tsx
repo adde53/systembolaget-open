@@ -42,10 +42,27 @@ export function SchemaMarkup() {
     "@context": "https://schema.org",
     "@type": "WebPage",
     "name": "Är Systembolaget öppet idag?",
-    "description": "Få svar direkt på om Systembolaget är öppet just nu. Se dagens öppettider, helgdagar och specialtider.",
+    "description": "Se direkt om Systembolaget är öppet just nu. Kolla öppettider idag, imorgon och alla helgdagar 2026. Hitta din närmaste butik.",
     "datePublished": "2024-01-01",
     "dateModified": today,
-    "inLanguage": "sv-SE"
+    "inLanguage": "sv-SE",
+    "url": "https://arsystembolagetoppet.se/",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Är Systembolaget öppet?",
+      "url": "https://arsystembolagetoppet.se/"
+    }
+  };
+
+  // Speakable schema for voice search (Google Assistant)
+  const speakableSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": ["h1", ".status-answer"]
+    },
+    "url": "https://arsystembolagetoppet.se/"
   };
 
   return (
@@ -61,6 +78,10 @@ export function SchemaMarkup() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(speakableSchema) }}
       />
     </>
   );
