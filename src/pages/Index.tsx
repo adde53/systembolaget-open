@@ -33,18 +33,21 @@ const Index = () => {
             <div className="flex flex-col items-center flex-1 min-w-0">
               {/* H1 - Primary keyword */}
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-8 text-center">
-                Är Systembolaget öppet?
+                Är Systembolaget öppet idag?
               </h1>
 
-              {/* Status display - Direct answer */}
-              <StatusDisplay />
+              {/* Status display - Direct answer with class for speakable */}
+              <div className="status-answer">
+                <StatusDisplay />
+              </div>
 
               {/* Store search - Directly below status */}
               <div className="mt-6 w-full max-w-md">
+                <h2 className="sr-only">Sök efter en Systembolaget-butik</h2>
                 <StoreSearch />
               </div>
 
-              {/* Upcoming holidays - mobile only (shows below search) */}
+              {/* Upcoming holidays - mobile only */}
               <div className="mt-8 w-full max-w-md lg:hidden">
                 <UpcomingHolidays />
               </div>
@@ -66,18 +69,20 @@ const Index = () => {
 
         {/* Footer */}
         <footer className="py-8 px-4 text-center border-t border-border mt-12">
-          <p className="text-xs text-muted-foreground max-w-md mx-auto">
-            Den här sidan är inte officiellt kopplad till Systembolaget AB. 
-            Kontrollera alltid din lokala butiks öppettider på{' '}
-            <a 
-              href="https://www.systembolaget.se/butiker-ombud/butik/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="underline hover:text-foreground transition-colors"
-            >
-              systembolaget.se
-            </a>
-          </p>
+          <nav aria-label="Extern länk">
+            <p className="text-xs text-muted-foreground max-w-md mx-auto">
+              Den här sidan är inte officiellt kopplad till Systembolaget AB. 
+              Kontrollera alltid din lokala butiks öppettider på{' '}
+              <a 
+                href="https://www.systembolaget.se/butiker-ombud/butik/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="underline hover:text-foreground transition-colors"
+              >
+                systembolaget.se
+              </a>
+            </p>
+          </nav>
         </footer>
       </div>
     </>
