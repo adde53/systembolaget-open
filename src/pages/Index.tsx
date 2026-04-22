@@ -1,5 +1,4 @@
 import { StatusDisplay } from '@/components/StatusDisplay';
-import { StoreSearch } from '@/components/StoreSearch';
 import { OpeningHours } from '@/components/OpeningHours';
 import { HolidayInfo } from '@/components/HolidayInfo';
 import { FAQ } from '@/components/FAQ';
@@ -39,12 +38,6 @@ const Index = () => {
               {/* Status display - Direct answer with class for speakable */}
               <div className="status-answer">
                 <StatusDisplay />
-              </div>
-
-              {/* Store search - Directly below status */}
-              <div className="mt-6 w-full max-w-md">
-                <h2 className="sr-only">Sök efter en Systembolaget-butik</h2>
-                <StoreSearch />
               </div>
 
               {/* Upcoming holidays - mobile only */}
