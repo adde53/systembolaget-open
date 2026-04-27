@@ -8,13 +8,17 @@ const links = [
   { to: '/', label: 'Är Systembolaget öppet idag?' },
   { to: '/systembolaget-oppettider', label: 'Systembolaget öppettider' },
   { to: '/systembolaget-roda-dagar-2026', label: 'Röda dagar 2026' },
-  { to: '/systembolaget-sondagsoppet', label: 'Systembolaget söndagsöppet' },
+  { to: '/systembolaget-oppet-sondag', label: 'Öppet söndag?' },
   { to: '/systembolaget-midsommar', label: 'Midsommar' },
   { to: '/systembolaget-pask', label: 'Påsk' },
   { to: '/systembolaget-jul', label: 'Jul' },
   { to: '/systembolaget-nyar', label: 'Nyår' },
   { to: '/systembolaget-oppet-imorgon', label: 'Öppet imorgon?' },
   { to: '/nar-stanger-systembolaget', label: 'När stänger Systembolaget?' },
+  { to: '/systembolaget-1-maj-oppettider', label: '1 maj öppettider' },
+  { to: '/systembolaget-pask-oppettider', label: 'Påsk öppettider' },
+  { to: '/systembolaget-fredag-oppettider', label: 'Fredag öppettider' },
+  { to: '/systembolaget-oppen-idag', label: 'Öppet idag?' },
 ];
 
 export function InternalLinks({ exclude }: InternalLinksProps) {

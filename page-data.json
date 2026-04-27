@@ -2,9 +2,9 @@
   "pages": [
     {
       "path": "/systembolaget-oppettider",
-      "title": "Systembolaget öppettider 2026 – Vardagar, lördagar & helgdagar",
-      "description": "Se Systembolagets öppettider idag. Måndag–fredag 10–19, lördag 10–15, söndag stängt. Avvikande tider vid röda dagar.",
-      "keywords": "systembolaget öppettider, systembolaget öppettider idag, systembolaget tider, öppettider systembolaget",
+      "title": "Systembolaget öppettider 2026 – Idag, vardagar & helgdagar",
+      "description": "Systembolaget öppettider 2026: mån–fre 10–19, lördag 10–15, söndag stängt. Se avvikande tider vid helgdagar och röda dagar.",
+      "keywords": "systembolaget öppettider 2026, systembolaget öppettider, systembolaget öppettider idag, systembolaget tider",
       "h1": "Systembolaget öppettider 2026",
       "body": "<p>Systembolagets ordinarie öppettider: <strong>Måndag–Fredag 10:00–19:00</strong>, <strong>Lördag 10:00–15:00</strong>, <strong>Söndag: Stängt</strong>.</p><h2>Öppettider per dag</h2><ul><li>Måndag: 10:00–19:00</li><li>Tisdag: 10:00–19:00</li><li>Onsdag: 10:00–19:00</li><li>Torsdag: 10:00–19:00</li><li>Fredag: 10:00–19:00</li><li>Lördag: 10:00–15:00</li><li>Söndag: Stängt</li></ul>"
     },
@@ -15,14 +15,6 @@
       "keywords": "systembolaget röda dagar, systembolaget helgdagar 2026, systembolaget stängt röda dagar",
       "h1": "Systembolaget röda dagar 2026",
       "body": "<p><strong>Systembolaget är stängt på alla röda dagar i Sverige.</strong></p><h2>Röda dagar 2026</h2><ul><li>Nyårsdagen – 1 januari</li><li>Trettondedag jul – 6 januari</li><li>Långfredagen – 3 april</li><li>Påskafton – 4 april</li><li>Påskdagen – 5 april</li><li>Annandag påsk – 6 april</li><li>Första maj – 1 maj</li><li>Kristi himmelsfärdsdag – 14 maj</li><li>Sveriges nationaldag – 6 juni</li><li>Midsommarafton – 19 juni</li><li>Midsommardagen – 20 juni</li><li>Alla helgons dag – 31 oktober</li><li>Julafton – 24 december</li><li>Juldagen – 25 december</li><li>Annandag jul – 26 december</li><li>Nyårsafton – 31 december</li></ul>"
-    },
-    {
-      "path": "/systembolaget-sondagsoppet",
-      "title": "Har Systembolaget öppet på söndagar? Nej – se alternativ",
-      "description": "Systembolaget är alltid stängt på söndagar. Se vilka alternativ som finns och öppettider övriga dagar.",
-      "keywords": "systembolaget söndag, systembolaget öppet söndag, systembolaget söndagsöppet",
-      "h1": "Har Systembolaget öppet på söndagar?",
-      "body": "<p><strong>Nej, Systembolaget är alltid stängt på söndagar.</strong> Det finns inga undantag. Systembolaget har öppet måndag till lördag.</p><h2>Alternativ på söndagar</h2><ul><li>Handla på lördagen – öppet 10:00–15:00</li><li>Restauranger och barer serverar alkohol på söndagar</li><li>Beställ online via systembolaget.se</li></ul>"
     },
     {
       "path": "/systembolaget-midsommar",
@@ -71,6 +63,38 @@
       "keywords": "när stänger systembolaget, systembolaget stänger, systembolaget stängningstid",
       "h1": "När stänger Systembolaget idag?",
       "body": "<p>Systembolaget stänger: <strong>Måndag–Fredag kl 19:00</strong>, <strong>Lördag kl 15:00</strong>. Stängt söndag och röda dagar.</p><p>Vissa större butiker stänger kl 20:00 på vardagar.</p>"
+    },
+    {
+      "path": "/systembolaget-oppet-sondag",
+      "title": "Är Systembolaget öppet på söndagar? Nej, alltid stängt",
+      "description": "Systembolaget har inte öppet på söndagar. Se lördagens öppettider (10–15) och vad du kan göra istället.",
+      "keywords": "är systembolaget öppet på söndagar, systembolaget öppet söndag, systembolaget söndag, har systembolaget öppet på söndagar",
+      "h1": "Är Systembolaget öppet på söndagar?",
+      "body": "<p><strong>Nej, Systembolaget har aldrig öppet på söndagar.</strong> Alla 450+ butiker i hela Sverige är stängda varje söndag, året runt. Det finns inga undantag.</p><h2>Systembolagets öppettider</h2><ul><li>Måndag–Fredag: 10:00–19:00</li><li>Lördag: 10:00–15:00</li><li>Söndag: <strong>Stängt</strong></li></ul><p>Handla senast <strong>lördag 10:00–15:00</strong> om du behöver något till söndagen.</p><h2>Alternativ på söndagar</h2><ul><li>Restauranger och barer serverar alkohol</li><li>Beställ online på systembolaget.se</li><li>Taxfree på flygplatser</li></ul>"
+    },
+    {
+      "path": "/systembolaget-1-maj-oppettider",
+      "title": "Systembolaget öppettider 1 maj 2026 – Stängt, handla dagen innan",
+      "description": "Systembolaget har stängt 1 maj (röd dag). Öppettider dagarna runt första maj och när du senast kan handla.",
+      "keywords": "systembolaget öppettider 1 maj, systembolaget 1 maj, systembolaget första maj, systembolaget öppet 1 maj",
+      "h1": "Har Systembolaget öppet 1 maj?",
+      "body": "<p><strong>Nej, första maj är en röd dag – Systembolaget är stängt.</strong></p><h2>Öppettider runt 1 maj 2026</h2><ul><li>Torsdag 30 april (Valborgsmässoafton): 10:00–19:00</li><li>Fredag 1 maj: <strong>Stängt</strong></li><li>Lördag 2 maj: 10:00–15:00</li></ul><p>Handla senast <strong>torsdag 30 april</strong>.</p>"
+    },
+    {
+      "path": "/systembolaget-pask-oppettider",
+      "title": "Systembolaget öppettider påsk 2026 – Stängt 4 dagar i rad",
+      "description": "Systembolaget stänger långfredag till annandag påsk. Se dag-för-dag öppettider påsken 2026 och sista chansen att handla.",
+      "keywords": "systembolaget öppettider påsk 2026, systembolaget påsk öppettider, systembolaget påskafton öppettider",
+      "h1": "Systembolaget öppettider påsk 2026",
+      "body": "<p><strong>Systembolaget håller stängt från långfredagen till och med annandag påsk.</strong></p><h2>Dag-för-dag påsk 2026</h2><ul><li>Skärtorsdag 2 april: 10:00–19:00 (SISTA CHANSEN)</li><li>Långfredagen 3 april: Stängt</li><li>Påskafton 4 april: Stängt</li><li>Påskdagen 5 april: Stängt</li><li>Annandag påsk 6 april: Stängt</li><li>Tisdag 7 april: 10:00–19:00 (öppnar igen)</li></ul>"
+    },
+    {
+      "path": "/systembolaget-fredag-oppettider",
+      "title": "Systembolaget öppettider fredag – Öppet till 19:00",
+      "description": "Systembolaget har öppet 10:00–19:00 på fredagar. Se om det är öppet just nu och vilka undantag som gäller vid röda dagar.",
+      "keywords": "systembolaget fredag, systembolaget öppettider fredag, systembolaget öppet fredag",
+      "h1": "Systembolaget öppettider fredag",
+      "body": "<p>Systembolaget har öppet <strong>10:00–19:00</strong> på fredagar. Vissa större butiker kan ha öppet till 20:00.</p><h2>Hela veckans öppettider</h2><ul><li>Måndag–Fredag: 10:00–19:00</li><li>Lördag: 10:00–15:00</li><li>Söndag: Stängt</li></ul><h2>Undantag på fredagar</h2><p>Om fredagen är en röd dag (t.ex. långfredagen, midsommarafton) är Systembolaget stängt hela dagen.</p>"
     }
   ]
 }

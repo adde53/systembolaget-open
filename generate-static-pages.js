@@ -96,3 +96,26 @@ for (const page of pages) {
 }
 
 console.log(`\nGenerated ${created} static pages for SEO`);
+
+// Generate redirect pages
+const redirects = [
+  { from: '/systembolaget-sondagsoppet', to: '/systembolaget-oppet-sondag' },
+];
+
+for (const r of redirects) {
+  const dir = path.join(DIST, r.from.slice(1));
+  fs.mkdirSync(dir, { recursive: true });
+  const html = `<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8"/>
+  <link rel="canonical" href="${BASE_URL}${r.to}"/>
+  <meta http-equiv="refresh" content="0;url=${r.to}"/>
+  <title>Redirect</title>
+</head>
+<body><a href="${r.to}">Klicka h\u00e4r</a></body>
+</html>`;
+  fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf-8');
+  console.log(`  REDIRECT ${r.from} -> ${r.to}`);
+}
+

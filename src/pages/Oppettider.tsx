@@ -8,10 +8,10 @@ export default function Oppettider() {
   return (
     <>
       <SEOHead
-        title="Systembolaget öppettider 2026 – Vardagar, lördagar & helgdagar"
-        description="Se Systembolagets öppettider idag. Måndag–fredag 10–19, lördag 10–15, söndag stängt. Avvikande tider vid röda dagar."
+        title="Systembolaget öppettider 2026 – Idag, vardagar & helgdagar"
+        description="Systembolaget öppettider 2026: mån–fre 10–19, lördag 10–15, söndag stängt. Se avvikande tider vid helgdagar och röda dagar."
         canonical="/systembolaget-oppettider"
-        keywords="systembolaget öppettider, systembolaget öppettider idag, systembolaget tider, öppettider systembolaget"
+        keywords="systembolaget öppettider 2026, systembolaget öppettider, systembolaget öppettider idag, systembolaget tider"
       />
       <PageLayout currentPath="/systembolaget-oppettider">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6 text-center">

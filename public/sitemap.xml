@@ -19,10 +19,10 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://arsystembolagetoppet.se/systembolaget-sondagsoppet</loc>
+    <loc>https://arsystembolagetoppet.se/systembolaget-oppet-sondag</loc>
     <lastmod>2026-04-27</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://arsystembolagetoppet.se/systembolaget-midsommar</loc>
@@ -58,6 +58,24 @@
     <loc>https://arsystembolagetoppet.se/nar-stanger-systembolaget</loc>
     <lastmod>2026-04-27</lastmod>
     <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://arsystembolagetoppet.se/systembolaget-1-maj-oppettider</loc>
+    <lastmod>2026-04-27</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://arsystembolagetoppet.se/systembolaget-pask-oppettider</loc>
+    <lastmod>2026-04-27</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://arsystembolagetoppet.se/systembolaget-fredag-oppettider</loc>
+    <lastmod>2026-04-27</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 </urlset>
