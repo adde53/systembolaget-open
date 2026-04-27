@@ -17,8 +17,8 @@ export default function RodaDagar() {
   return (
     <>
       <SEOHead
-        title="Systembolaget röda dagar 2026 – Alla helgdagar det är stängt"
-        description="Komplett lista över alla röda dagar 2026 då Systembolaget är stängt. Jul, påsk, midsommar, nyår och fler. Planera dina inköp i tid."
+        title="Röda dagar 2026 – När har Systembolaget stängt?"
+        description="Alla röda dagar och helgdagar 2026 då Systembolaget håller stängt. Se datum för påsk, midsommar, jul och nyår."
         canonical="/systembolaget-roda-dagar-2026"
         keywords="systembolaget röda dagar, systembolaget helgdagar 2026, systembolaget stängt röda dagar"
       />

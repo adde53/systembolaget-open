@@ -1,9 +1,9 @@
 import { HolidayPage } from '@/components/HolidayPage';
 export default function Nyar() {
   return <HolidayPage
-    title="Har Systembolaget öppet på nyårsafton 2026? – Stängt 31 dec & 1 jan"
+    title="Systembolaget nyår 2026 – Stängt nyårsafton & nyårsdagen"
     h1="Har Systembolaget öppet på nyår?"
-    description="Systembolaget är stängt nyårsafton 31 december och nyårsdagen 1 januari. Handla senast 30 december. Komplett guide."
+    description="Systembolaget stänger nyårsafton och nyårsdagen. Se sista dagen att handla och öppettider runt nyår 2026."
     canonical="/systembolaget-nyar"
     keywords="systembolaget nyår, systembolaget nyårsafton, systembolaget öppet nyår, systembolaget 31 december"
     answer="Nej, Systembolaget är stängt på nyårsafton (31 december) och nyårsdagen (1 januari). Se till att handla allt du behöver senast den 30 december."

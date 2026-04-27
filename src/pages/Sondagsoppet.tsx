@@ -5,8 +5,8 @@ export default function Sondagsoppet() {
   return (
     <>
       <SEOHead
-        title="Är Systembolaget öppet på söndagar? – Svar & alternativ"
-        description="Nej, Systembolaget har aldrig öppet på söndagar. Läs varför och se vilka alternativ du har. Öppettider lördag och andra dagar."
+        title="Har Systembolaget öppet på söndagar? Nej – se alternativ"
+        description="Systembolaget är alltid stängt på söndagar. Se vilka alternativ som finns och öppettider övriga dagar."
         canonical="/systembolaget-sondagsoppet"
         keywords="systembolaget söndag, systembolaget öppet söndag, systembolaget söndagsöppet, har systembolaget öppet på söndagar"
       />

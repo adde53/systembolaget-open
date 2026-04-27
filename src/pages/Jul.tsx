@@ -1,9 +1,9 @@
 import { HolidayPage } from '@/components/HolidayPage';
 export default function Jul() {
   return <HolidayPage
-    title="Har Systembolaget öppet på jul 2026? – Stängt 24–26 december"
+    title="Systembolaget jul 2026 – Stängt 24–26 dec, handla innan"
     h1="Har Systembolaget öppet på jul?"
-    description="Systembolaget är stängt julafton, juldagen och annandag jul 2026. Handla senast 23 december. Se öppettider och tips."
+    description="Systembolaget är stängt julafton, juldagen och annandag jul. Se öppettider dagarna före jul och sista chansen att handla."
     canonical="/systembolaget-jul"
     keywords="systembolaget jul, systembolaget öppet julafton, systembolaget juldagen, systembolaget öppettider jul"
     answer="Nej, Systembolaget är stängt under hela julhelgen – julafton (24 dec), juldagen (25 dec) och annandag jul (26 dec). Planera dina julinköp i god tid!"

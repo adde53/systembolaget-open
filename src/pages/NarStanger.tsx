@@ -15,8 +15,8 @@ export default function NarStanger() {
   return (
     <>
       <SEOHead
-        title="När stänger Systembolaget idag? – Se stängningstid nu"
-        description="Se exakt när Systembolaget stänger idag. Öppettider vardagar, lördagar och information om helgdagar."
+        title="När stänger Systembolaget idag? Se tid nu"
+        description="Se exakt när Systembolaget stänger idag. Stängningstider vardagar, lördagar och avvikande helgdagar."
         canonical="/nar-stanger-systembolaget"
         keywords="när stänger systembolaget, systembolaget stänger, systembolaget stängningstid, hur länge har systembolaget öppet"
       />

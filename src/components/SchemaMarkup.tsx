@@ -41,8 +41,8 @@ export function SchemaMarkup() {
   const webPageSchema = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "name": "Är Systembolaget öppet idag?",
-    "description": "Se direkt om Systembolaget är öppet just nu. Kolla öppettider idag, imorgon och alla helgdagar 2026. Hitta din närmaste butik.",
+    "name": "Är Systembolaget öppet idag? Se öppettider nu",
+    "description": "Kolla om Systembolaget är öppet idag, dagens öppettider och avvikande tider för helger och röda dagar.",
     "datePublished": "2024-01-01",
     "dateModified": today,
     "inLanguage": "sv-SE",

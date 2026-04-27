@@ -1,9 +1,9 @@
 import { HolidayPage } from '@/components/HolidayPage';
 export default function Pask() {
   return <HolidayPage
-    title="Har Systembolaget öppet på påsk 2026? – Stängt långfredag till annandag"
+    title="Systembolaget påsk 2026 – Stängt 4 dagar i rad"
     h1="Har Systembolaget öppet på påsk?"
-    description="Systembolaget är stängt från långfredagen till och med annandag påsk 2026. Handla senast skärtorsdagen. Komplett guide."
+    description="Systembolaget stänger från långfredagen till annandag påsk 2026. Se vilka dagar och sista chansen att handla."
     canonical="/systembolaget-pask"
     keywords="systembolaget påsk, systembolaget öppet påsk, systembolaget påskafton, systembolaget långfredagen"
     answer="Nej, Systembolaget är stängt under hela påskhelgen – från långfredagen till och med annandag påsk. Det innebär fyra sammanhängande stängda dagar."

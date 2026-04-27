@@ -8,8 +8,8 @@ export default function Oppettider() {
   return (
     <>
       <SEOHead
-        title="Systembolaget öppettider 2026 – Alla veckodagar & helgdagar"
-        description="Kompletta öppettider för Systembolaget 2026. Måndag–fredag 10–19, lördag 10–15, söndag stängt. Se alla helgdagar och undantag."
+        title="Systembolaget öppettider 2026 – Vardagar, lördagar & helgdagar"
+        description="Se Systembolagets öppettider idag. Måndag–fredag 10–19, lördag 10–15, söndag stängt. Avvikande tider vid röda dagar."
         canonical="/systembolaget-oppettider"
         keywords="systembolaget öppettider, systembolaget öppettider idag, systembolaget tider, öppettider systembolaget"
       />

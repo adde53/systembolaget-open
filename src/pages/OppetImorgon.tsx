@@ -35,8 +35,8 @@ export default function OppetImorgon() {
   return (
     <>
       <SEOHead
-        title="Har Systembolaget öppet imorgon? – Se öppettider"
-        description="Kolla snabbt om Systembolaget har öppet imorgon. Se öppettider för imorgon och resten av veckan."
+        title="Systembolaget öppet imorgon? Kolla öppettider"
+        description="Se om Systembolaget har öppet imorgon och vilka öppettider som gäller. Uppdateras dagligen."
         canonical="/systembolaget-oppet-imorgon"
         keywords="systembolaget öppet imorgon, har systembolaget öppet imorgon, systembolaget imorgon"
       />
