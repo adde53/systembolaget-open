@@ -19,6 +19,7 @@ import OppetSondag from "./pages/OppetSondag";
 import ForstaMaj from "./pages/ForstaMaj";
 import PaskOppettider from "./pages/PaskOppettider";
 import FredagOppettider from "./pages/FredagOppettider";
+import OppenIdag from "./pages/OppenIdag";
 
 const queryClient = new QueryClient();
 
