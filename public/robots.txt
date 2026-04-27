@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://arsystembolagetoppet.se/sitemap.xml
+Sitemap: https://www.xn--rsystembolagetppet-ktb88a.se/sitemap.xml
