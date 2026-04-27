@@ -46,11 +46,11 @@ export function SchemaMarkup() {
     "datePublished": "2024-01-01",
     "dateModified": today,
     "inLanguage": "sv-SE",
-    "url": "https://arsystembolagetoppet.se/",
+    "url": "https://www.xn--rsystembolagetppet-ktb88a.se/",
     "isPartOf": {
       "@type": "WebSite",
       "name": "Är Systembolaget öppet?",
-      "url": "https://arsystembolagetoppet.se/"
+      "url": "https://www.xn--rsystembolagetppet-ktb88a.se/"
     }
   };
 
@@ -62,7 +62,7 @@ export function SchemaMarkup() {
       "@type": "SpeakableSpecification",
       "cssSelector": ["h1", ".status-answer"]
     },
-    "url": "https://arsystembolagetoppet.se/"
+    "url": "https://www.xn--rsystembolagetppet-ktb88a.se/"
   };
 
   return (

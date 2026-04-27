@@ -8,7 +8,7 @@ interface SEOHeadProps {
 }
 
 export function SEOHead({ title, description, canonical, keywords }: SEOHeadProps) {
-  const fullUrl = `https://arsystembolagetoppet.se${canonical}`;
+  const fullUrl = `https://www.xn--rsystembolagetppet-ktb88a.se${canonical}`;
   return (
     <Helmet>
       <title>{title}</title>

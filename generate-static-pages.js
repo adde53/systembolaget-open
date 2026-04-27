@@ -7,7 +7,7 @@ import fs from 'fs';
 import path from 'path';
 
 const DIST = path.resolve('dist');
-const BASE_URL = 'https://arsystembolagetoppet.se';
+const BASE_URL = 'https://www.xn--rsystembolagetppet-ktb88a.se';
 
 // Read built index.html to extract hashed asset references
 const builtHtml = fs.readFileSync(path.join(DIST, 'index.html'), 'utf-8');
