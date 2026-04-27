@@ -3,25 +3,45 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Oppettider from "./pages/Oppettider";
+import RodaDagar from "./pages/RodaDagar";
+import Sondagsoppet from "./pages/Sondagsoppet";
+import Midsommar from "./pages/Midsommar";
+import Pask from "./pages/Pask";
+import Jul from "./pages/Jul";
+import Nyar from "./pages/Nyar";
+import OppetImorgon from "./pages/OppetImorgon";
+import NarStanger from "./pages/NarStanger";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/systembolaget-oppettider" element={<Oppettider />} />
+            <Route path="/systembolaget-roda-dagar-2026" element={<RodaDagar />} />
+            <Route path="/systembolaget-sondagsoppet" element={<Sondagsoppet />} />
+            <Route path="/systembolaget-midsommar" element={<Midsommar />} />
+            <Route path="/systembolaget-pask" element={<Pask />} />
+            <Route path="/systembolaget-jul" element={<Jul />} />
+            <Route path="/systembolaget-nyar" element={<Nyar />} />
+            <Route path="/systembolaget-oppet-imorgon" element={<OppetImorgon />} />
+            <Route path="/nar-stanger-systembolaget" element={<NarStanger />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;

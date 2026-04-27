@@ -4,6 +4,7 @@ import { HolidayInfo } from '@/components/HolidayInfo';
 import { FAQ } from '@/components/FAQ';
 import { SchemaMarkup } from '@/components/SchemaMarkup';
 import { UpcomingHolidays } from '@/components/UpcomingHolidays';
+import { InternalLinks } from '@/components/InternalLinks';
 
 const Index = () => {
   const today = new Date().toLocaleDateString('sv-SE', {
@@ -26,36 +27,29 @@ const Index = () => {
 
         {/* Main content with optional sidebar */}
         <main className="px-4 py-8 sm:py-12">
-          <div className="max-w-5xl mx-auto flex flex-col lg:flex-row lg:items-start lg:gap-8">
-            
-            {/* Center column: main content */}
-            <div className="flex flex-col items-center flex-1 min-w-0">
-              {/* H1 - Primary keyword */}
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-8 text-center">
-                Är Systembolaget öppet idag?
-              </h1>
+          <div className="max-w-2xl mx-auto flex flex-col items-center">
 
-              {/* Status display - Direct answer with class for speakable */}
-              <div className="status-answer">
-                <StatusDisplay />
-              </div>
+            {/* H1 - Primary keyword */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-8 text-center">
+              Är Systembolaget öppet idag?
+            </h1>
 
-              {/* Upcoming holidays - mobile only */}
-              <div className="mt-8 w-full max-w-md lg:hidden">
-                <UpcomingHolidays />
-              </div>
-
-              {/* Content sections */}
-              <div className="mt-12 sm:mt-16 flex flex-col items-center gap-10 sm:gap-12 w-full px-0">
-                <OpeningHours />
-                <HolidayInfo />
-                <FAQ />
-              </div>
+            {/* Status display - Direct answer with class for speakable */}
+            <div className="status-answer">
+              <StatusDisplay />
             </div>
 
-            {/* Right sidebar: upcoming holidays - desktop only */}
-            <div className="hidden lg:block w-72 flex-shrink-0 sticky top-8">
+            {/* Upcoming holidays — inline, full width */}
+            <div className="mt-10 w-full">
               <UpcomingHolidays />
+            </div>
+
+            {/* Content sections */}
+            <div className="mt-12 sm:mt-16 flex flex-col items-center gap-10 sm:gap-12 w-full">
+              <OpeningHours />
+              <HolidayInfo />
+              <FAQ />
+              <InternalLinks exclude="/" />
             </div>
           </div>
         </main>
