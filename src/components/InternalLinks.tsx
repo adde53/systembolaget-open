@@ -19,6 +19,7 @@ const links = [
   { to: '/systembolaget-pask-oppettider', label: 'Påsk öppettider' },
   { to: '/systembolaget-fredag-oppettider', label: 'Fredag öppettider' },
   { to: '/systembolaget-oppen-idag', label: 'Öppet idag?' },
+  { to: '/systembolaget-oppettider-2026', label: 'Öppettider 2026' },
 ];
 
 export function InternalLinks({ exclude }: InternalLinksProps) {

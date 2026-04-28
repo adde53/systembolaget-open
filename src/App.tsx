@@ -20,6 +20,7 @@ import ForstaMaj from "./pages/ForstaMaj";
 import PaskOppettider from "./pages/PaskOppettider";
 import FredagOppettider from "./pages/FredagOppettider";
 import OppenIdag from "./pages/OppenIdag";
+import Oppettider2026 from "./pages/Oppettider2026";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/systembolaget-pask-oppettider" element={<PaskOppettider />} />
             <Route path="/systembolaget-fredag-oppettider" element={<FredagOppettider />} />
             <Route path="/systembolaget-oppen-idag" element={<OppenIdag />} />
+            <Route path="/systembolaget-oppettider-2026" element={<Oppettider2026 />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
